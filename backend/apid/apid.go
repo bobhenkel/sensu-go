@@ -154,6 +154,8 @@ func (a *APId) Name() string {
 func registerUnauthenticatedResources(
 	router *mux.Router,
 	store store.Store,
+	getter types.QueueGetter,
+	bus messaging.MessageBus,
 ) {
 	mountRouters(
 		NewSubrouter(
@@ -161,6 +163,7 @@ func registerUnauthenticatedResources(
 			middlewares.SimpleLogger{},
 			middlewares.LimitRequest{},
 			middlewares.Edition{Name: version.Edition},
+			routers.NewGraphQLRouter(store, bus, getter),
 		),
 		routers.NewHealthRouter(actions.NewHealthController(store)),
 	)
@@ -197,7 +200,6 @@ func registerRestrictedLegacyResources(router *mux.Router, store store.Store, ge
 		routers.NewEntitiesRouter(store),
 		routers.NewEventFiltersRouter(store),
 		routers.NewEventsRouter(store, bus),
-		routers.NewGraphQLRouter(store, bus, getter),
 		routers.NewHandlersRouter(store),
 		routers.NewHooksRouter(store),
 		routers.NewMutatorsRouter(store),
